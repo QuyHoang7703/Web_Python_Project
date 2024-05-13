@@ -6,6 +6,7 @@ from django.contrib.auth.models import AbstractUser
 class User(AbstractUser):
     avatar = models.ImageField(upload_to='uploads/%Y/%m')
 
+
 class Account(models.Model):
     user_name = models.CharField(max_length=50, null=False, unique=True)
     password = models.CharField(max_length=50, null=False)
