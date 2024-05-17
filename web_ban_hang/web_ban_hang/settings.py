@@ -77,9 +77,9 @@ WSGI_APPLICATION = 'web_ban_hang.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'python_project',
+        'NAME': 'shop_giay',
         'USER': 'root',
-        'PASSWORD': '1234567',
+        'PASSWORD': '',
         'HOST': 'localhost'
     }
 }
