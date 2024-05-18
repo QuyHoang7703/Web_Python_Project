@@ -3,6 +3,22 @@
 
 {% block main-content %}  
 
+{% comment %} <div class="row">
+    {% for product in products %}
+    <div class="col-lg-3">
+        <img class="thumbnail" src="/static/{{product.image}}" alt="...">
+        <div class="box-element product">
+            <h6><strong>{{ product.name }}</strong></h6>
+            <hr>
+            <button class="btn btn-outline-secondary add-btn btn-cart">Thêm vào giỏ hàng</button>
+            <a class="btn btn-outline-success btn-seen" href="#">Xem</a>
+            <h4 style="display:inline-block; float: right; font-size:16px;"><strong>{{ product.price }} VNĐ</strong></h4>
+        </div>
+    </div>
+    {% endfor %}
+</div> {% endcomment %}
+{% if products %}
+<p>có sản phẩm nào {{ products|length }}.</p>
 <div class="row">
     {% for product in products %}
     <div class="col-lg-3">
@@ -17,5 +33,10 @@
     </div>
     {% endfor %}
 </div>
+{% else %}
+<p>Không có sản phẩm nào.</p>
+{% endif %}
+
+
 {% endblock main-content %}
 

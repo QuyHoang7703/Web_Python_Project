@@ -10,7 +10,16 @@
     <link href="{%static 'app/css/owl.carousel.min.css' %}" rel="stylesheet" />
     <link href="{%static 'app/css/all.min.css' %}" rel="stylesheet" />
     <link href="{%static 'app/css/main.css' %}" rel="stylesheet" />
-
+    <style>
+      .custom-alert {
+          z-index: 1050; /* Giá trị z-index cao để đảm bảo nằm trên các phần tử khác */
+          position: fixed;
+          top: 20px;
+          right: 20px;
+          width: auto;
+          max-width: 1300px; 
+      }
+    </style>
     
     <!-- js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
@@ -25,6 +34,23 @@
     
 </head>
 <body>
+  {% if messages %}
+    <div class="container mt-4">
+        {% for message in messages %}
+            <div class="alert alert-success alert-dismissible fade show custom-alert" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    </div>
+  {% endif %}
+  <script>
+    $(document).ready(function() {
+        setTimeout(function() {
+            $('.alert').fadeOut('slow');
+        }, 1500); 
+    });
+  </script>
   <div class="fixed_navbar">
   <form method="GET" action="{% url 'search_product' %}">
   <section class="myheader">
@@ -64,8 +90,11 @@
            
           </div>
           <div class="col">
-            <br>Xin chào!</br>
-            <strong class="text-danger">Đăng nhập </strong>
+            {% if user_name%}
+              <br>Xin chào! {{user_name}}</br>
+            {% else %}
+              <a href = {% url "login" %}><strong class="text-danger">Đăng nhập</strong></a>
+            {% endif %}
           </div>
         </div>
       </div>
@@ -79,9 +108,14 @@
            
           </div>
           <div class="col">
-            <br>Mời bạn!</br>
+            <br>Xem</br>
             <strong class="text-danger">Giỏ hàng</strong>
           </div>
+          <div class="col">
+            {% comment %} <br>Xem</br> {% endcomment %}
+            <a href= {% url "logout" %}><strong class="text-danger">Đăng xuất</strong></a>
+          </div>
+         
         </div>
  
     </div>
