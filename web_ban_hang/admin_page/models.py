@@ -8,6 +8,9 @@ class Customer(models.Model):
     address = models.CharField(max_length=100, null=False, blank=False)
     phone = models.CharField(max_length=100, null=False, blank=False)
 
+    def get_email(self):
+        return self.user.email
+    get_email.short_description = "Email"
 class Category(models.Model):
     name_category = models.CharField(max_length=100, null=False, unique=True, blank=False)
     def __str__(self):

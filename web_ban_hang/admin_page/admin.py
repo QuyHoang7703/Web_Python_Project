@@ -21,7 +21,7 @@ admin.site.site_header = "Admin Page"
     # get_role.short_description = 'Role'
 
 class Customer_Admin(admin.ModelAdmin):
-    list_display = ["name", "address", "phone", "user"]
+    list_display = ["name", "address", "phone", "user", "get_email"]
  
 class Category_Admin(admin.ModelAdmin):
     list_display = ["id", "name_category"]
@@ -43,6 +43,7 @@ class ProductSize_Admin(admin.ModelAdmin):
     readonly_fields= ["avatar"]
     search_fields = ["product__name", "size__name"]
     list_filter = ["size__name"]
+    list_per_page = 10
     def avatar(self, product_size):
         return mark_safe("<img src='/static/{img_url}' alt ='{alt}' width='110px'/>".format(img_url=product_size.product.image.name, alt=product_size.product.image.name))
 

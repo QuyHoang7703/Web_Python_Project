@@ -1,14 +1,16 @@
 from django.shortcuts import render, redirect
 from .models import *
 from django.core.exceptions import ObjectDoesNotExist
-from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
-from django.contrib.auth import authenticate, login as auth_login
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm, PasswordChangeForm
+from django.contrib.auth import authenticate, login as auth_login, update_session_auth_hash
 from django.contrib.auth import logout as auth_logout
 from django.urls import reverse
 from django.contrib import messages
 from .forms import *
 from django.http import HttpResponseRedirect
 from django.http import HttpResponse
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import AnonymousUser
 def register(request):
     if request.method == "POST":
         form = CreateFormRegister(request.POST)
@@ -36,8 +38,9 @@ def register(request):
             
             # Chuyển hướng đến trang thành công hoặc trang chính
             # return render(request, "admin_page/home.html")
+            request.session['user_name'] = user.username
             messages.success(request, "Bạn đã đăng nhập thành công.")
-            return redirect(reverse('home'))
+            return redirect(reverse('home'), {"username": username})
             # return redirect('home')
         else:
             form.add_error(None, 'Vui lòng điền đầy đủ thông tin')
@@ -72,21 +75,20 @@ def login(request):
           
     else:        
         form = AuthenticationForm()
-
-    return render(request, "login.html", context={"form":form})
+    return render(request, "login.html")
+    # return render(request, "login.html", context={"form":form})
+   
 
 def logout(request):
     if "user_name" in request.session:
         del request.session["user_name"]
-    # products = Product.objects.all()
 
     return redirect(reverse('home'))
-    # return render(request,'home.html', {'products': products})
+
 
 
 def home(request):
     products = Product.objects.all()
-   
     username = request.session.get("user_name", None)
     return render(request, 'home.html', {'products': products, 'user_name': username})
 
@@ -103,5 +105,86 @@ def search_product(request):
         product_names = Product.objects.all()
     return render(request, 'search_product.html', {'product_names': product_names}) 
 
+@login_required
+def view_information(request):
+    user_name = request.GET.get("user_name", None)
+    # print("Username: ", user_name)
+    if user_name:
+        print("Username: ", user_name)
+        user= User.objects.get(username=user_name)
+        customer = Customer.objects.get(user=user)
+        if user and customer:
+            name = customer.name
+            address = customer.address
+            phone = customer.phone
+            email = user.email
+            print(name, address, phone, email)
+            context={
+                "user_name": user_name,
+                "name": name,
+                "address" : address,
+                "phone": phone,
+                "email": email
+            }
+        return render(request, "view_information.html", context=context)  
+    else:
+        return HttpResponse("Không tìm thấy tên người dùng trong yêu cầu.")
 
+def update_information(request):
+    if request.method == "POST":
+        username = request.POST.get("username")
+        name = request.POST.get("name")
+        phone = request.POST.get("phone")
+        address = request.POST.get("address")
+        email = request.POST.get("email")
+        print(username, name, address)
+        
+        user= User.objects.get(username= username)
+        customer = Customer.objects.get(user=user)
+        customer.name = name
+        customer.address = address
+        customer.phone = phone
+        user.email = email
+        customer.save()
+        user.save()
+        
+        # Redirect to a success page or any other page
+        return redirect(reverse("home"))  # Replace 'success_page_url' with the URL of your success page
+        
+    return HttpResponse("Không tìm thấy người dùng hoặc thông tin khách hàng tương ứng blo.")
 
+def change_password(request):
+    if request.method == "GET":
+        user_name = request.GET.get("user_name")
+        context = {"user_name": user_name}
+        return render(request, "change_password.html", context=context)
+    
+    if request.method == 'POST':
+        user_name = request.POST.get("username")
+        old_password = request.POST.get("old_password")
+        new_password = request.POST.get("new_password")
+        confirm_password = request.POST.get("confirm_password")
+        
+        # Kiểm tra xem tất cả các trường thông tin đã được điền đầy đủ
+        if not (old_password and new_password and confirm_password):
+            messages.error(request, "Vui lòng điền đầy đủ thông tin")
+            return redirect(reverse('change_password') + f'?user_name={user_name}')
+
+        try:
+            user = User.objects.get(username=user_name)
+        except User.DoesNotExist:
+            messages.error(request, "Tài khoản không tồn tại")
+            return redirect(reverse('change_password'))
+
+        if user.check_password(old_password):
+            if new_password == confirm_password:
+                user.set_password(new_password)
+                user.save()
+                messages.success(request, "Mật khẩu đã được thay đổi thành công!")
+                return redirect(reverse("home"))
+            else:
+                messages.error(request, "Mật khẩu mới và xác nhận mật khẩu không trùng khớp")
+        else:
+            messages.error(request, "Mật khẩu hiện tại không chính xác")
+        
+        return redirect(reverse('change_password') + f'?user_name={user_name}')
