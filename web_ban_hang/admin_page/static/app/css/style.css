@@ -11,13 +11,6 @@
     transform : scale(1.1);
 }
 
-/* .owl-carousel img{
-    transition: transform .5s ease;
-  }
- .owl-carousel img:hover{
-    
-    transform : scale(1.25);
-} */
 
 .carousel-item {
  transition: transform .5s ease-in-out ;

@@ -21,7 +21,6 @@ class Product(models.Model):
     name = models.CharField(max_length=100, null=False, blank=False)
     price = models.FloatField()
     image = models.ImageField(upload_to="products", default=None)
-    # quantity = models.IntegerField(default=1)
 
 class Size(models.Model):
     name = models.CharField(max_length=30, null=False, blank=False) 

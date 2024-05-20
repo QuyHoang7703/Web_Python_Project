@@ -188,3 +188,12 @@ def change_password(request):
             messages.error(request, "Mật khẩu hiện tại không chính xác")
         
         return redirect(reverse('change_password') + f'?user_name={user_name}')
+    
+
+
+def detail_product(request):
+    if 'detail' in request.GET:
+        product_id = request.GET['detail']
+        product_sizes = ProductSize.objects.filter(product_id=product_id) 
+        return render(request, 'detail_product.html', {'product_sizes': product_sizes})
+    

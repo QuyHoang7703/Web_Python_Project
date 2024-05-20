@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block banner_slider %}
+{% endblock banner_slider %}
+{% block detail-content %} 
+<div class="row">
+    {% for size in product_sizes %}
+    {% if forloop.first %}
+    <div style="display:flex;">
+        <div class="col-lg-3" style="width: 950px;">
+            <img class="thumbnail" src="/static/{{size.product.image}}" style="width: 900px; height: auto; margin-left:10px; margin-bottom:10px;">
+        </div>
+        <div>
+            <h4>{{ size.product.name}}</h4>
+            <h4 id="total" style="color: #cc0000;">{{ size.product.price}} VNĐ</h4>
+            <div style="display:flex;">
+                <div class="input-group mb-3">
+                    {% for size in product_sizes %}                                 
+                    <div class="vcl"  style="display:flex; margin-left:5px;">
+                        <span class="border mr-3" onclick="toggleSelected(this)">
+                         {{ size.size.name}}
+                        </span>
+    
+                </div>
+                {% endfor %}               
+            </div>
+            <h5 id="quantity" style="position:relative; right:140px; top:10px; width:300px;" >Còn {{size.quantity}} sản phẩm</h5>
+            </div>
+
+                        <div class="d-flex" style="width:300px;"> 
+                            <div class="input-spinner">
+                                <input type="number" class="form-control" id="input-spinner" value="1" min="1" oninput="updateTotal()">
+                            </div>
+                            <div class="btn-group ml-3 flex-fill action-buttons">
+                                <button class="btn btn-add-to-cart flex-fill" type="button">
+                                    <i class="fa fa-shopping-cart"></i> THÊM VÀO GIỎ
+                                </button>           
+                            </div>
+                        </div>
+    </div>
+    </div>
+
+    {% endif %}
+    {% endfor %}
+</div>
+
+<style>
+
+
+    .input-spinner input {
+        width: 60px;
+        text-align: center;
+    }
+
+    .action-buttons .btn-add-to-cart {
+        background-color: #003366;
+        color: white;
+    }
+
+
+    .action-buttons .btn-add-to-cart:hover {
+        background-color: #002244;
+    }
+.selected {
+        border-color:blue !important;
+        color: blue;    
+        font-size: 18px;
+    }
+
+.vcl span {
+    cursor: pointer;                            
+      }
+</style>
+
+<script>
+    function updateTotal() {
+    var quantity = document.getElementById("input-spinner").value;
+    {% for size in product_sizes %}
+    {% if forloop.first %}
+    var pricePerItem = parseFloat("{{ size.product.price }}"); // Giá mỗi sản phẩm, chuyển về số thực
+    var total = quantity * pricePerItem;
+    
+    document.getElementById("total").textContent =total.toFixed(2) + " VNĐ"; // Định dạng tiền VNĐ
+    {% endif %}
+    {% endfor %}
+}
+
+function toggleSelected(element) {
+        document.querySelectorAll('.mr-3').forEach(function(el) {
+            el.classList.remove('selected');
+        });
+        element.classList.add('selected');
+        var size_shoes = element.textContent.trim();
+        {% for size in product_sizes %}
+        if(size_shoes === "{{size.size.name}}"){
+        document.getElementById("quantity").textContent = "Còn " + "{{size.quantity}} " + "sản phẩm";
+        }
+    {% endfor %}
+        
+    }
+function vcl(){
+    
+}
+</script>
+
+
+
+{% endblock detail-content %} 
