@@ -216,15 +216,57 @@ def cart(request):
     }
     return render(request, 'cart.html', context)
 
+# def addcart(request):
+#     if request.method == 'POST':
+#         # Lấy user_id từ session
+#         user_name = request.session.get('user_name')
+        
+#         # Lấy hoặc tạo instance của Customer từ user_name
+#         customer, _ = Customer.objects.get_or_create(user=User.objects.get(username=user_name))
+        
+#         if customer:
+#             product_id = request.POST.get('product_id')
+#             size_name = request.POST.get('size_id')
+#             quantity = int(request.POST.get('quantity', 1))
+
+#             product = get_object_or_404(Product, id=product_id)
+#             price = product.price * quantity
+
+#             # Tạo giỏ hàng chỉ khi có customer
+#             cart_item, created = Cart.objects.get_or_create(
+#                 customer=customer,
+#                 product=product,
+#                 size=size_name,
+#                 status = 0,
+#                 defaults={'quantity': quantity, 'price': price}
+#             )
+
+#             if not created:
+#                 cart_item.quantity += quantity
+#                 cart_item.price += price
+#                 cart_item.save()
+#             return redirect('home')
+#         else:
+#             return redirect('login')
+
 def addcart(request):
     if request.method == 'POST':
-        # Lấy user_id từ session
-        user_name = request.session.get('user_name')
-        
-        # Lấy hoặc tạo instance của Customer từ user_name
-        customer, _ = Customer.objects.get_or_create(user=User.objects.get(username=user_name))
-        
-        if customer:
+        # Kiểm tra xem session có chứa thông tin người dùng không
+        if 'user_name' in request.session:
+            # Lấy tên người dùng từ session
+            user_name = request.session['user_name']
+
+            # Tìm người dùng trong cơ sở dữ liệu bằng tên người dùng
+            try:
+                user = User.objects.get(username=user_name)
+            except User.DoesNotExist:
+                # Xử lý trường hợp người dùng không tồn tại
+                # Đây là lỗi logic, bạn cần xác định xem cách xử lý phù hợp là gì
+                return redirect('login')
+
+            # Lấy hoặc tạo instance của Customer từ user_name
+            customer, _ = Customer.objects.get_or_create(user=user)
+
             product_id = request.POST.get('product_id')
             size_name = request.POST.get('size_id')
             quantity = int(request.POST.get('quantity', 1))
@@ -237,7 +279,7 @@ def addcart(request):
                 customer=customer,
                 product=product,
                 size=size_name,
-                status = 0,
+                status=0,
                 defaults={'quantity': quantity, 'price': price}
             )
 
@@ -245,9 +287,12 @@ def addcart(request):
                 cart_item.quantity += quantity
                 cart_item.price += price
                 cart_item.save()
-
-    return redirect('home')
-
+            return redirect('home')
+        else:
+            return redirect('login')
+    else:
+        return redirect('home')
+    
 def checkout(request):
     # Xử lý logic thanh toán ở đây
     # Ví dụ: Tạo hóa đơn, xử lý thanh toán, vv.
