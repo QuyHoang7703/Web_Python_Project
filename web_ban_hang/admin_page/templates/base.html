@@ -63,6 +63,24 @@
     <script src="{%static 'app/js/owl.carousel.min.js' %}" ></script>
     <script src="{%static 'app/js/all.min.js' %}" ></script>
     <script src="{%static 'app/js/myscript.js' %}" ></script>
+    <script type="text/javascript">
+      function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                // Does this cookie string begin with the name we want?
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    const csrf_token = getCookie('csrftoken');
+    </script>
     <title>Web bán hàng</title>
     <meta name='viewport' content='width=device-width, initial-scale=1'>
     
@@ -142,9 +160,8 @@
            
           </div>
           <div class="col">
-            <br>Xem</br>
-            <strong class="text-danger">Giỏ hàng</strong>
-          </div>
+            <a href="/cart" class="text-danger"><strong>Xem Giỏ hàng</strong></a>
+        </div>        
           <div class="col">
             {% if user_name%}
             <br>Xem</br>
@@ -227,6 +244,7 @@
       {% block filter-content %} {% endblock filter-content %} 
       {% block search-content %} {% endblock search-content %} 
       {% block detail-content %} {% endblock detail-content %}
+      {% block cart-content %} {% endblock cart-content %}
       <!-- footer -->
      <section class="myfooter bg-dark text-white py-4">
       <div class="container">

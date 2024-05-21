@@ -1,3 +1,27 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 from django.db import models
 from django.contrib.auth.models import User
 
@@ -48,3 +72,16 @@ class ProductSize(models.Model):
     get_size_product.short_description = "Size"
     get_img_product.short_description = "Image"
     # get_price_product.short_description = "Price"
+    
+class Cart(models.Model):
+    customer = models.ForeignKey(Customer, on_delete=models.CASCADE)  # Tham chiếu đến model Customer
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    size = models.CharField(max_length=30, null=False, blank=False)
+    quantity = models.IntegerField(null=False, blank=False)
+    price = models.FloatField(null=False, blank=False)
+    status = models.BooleanField(default=False)
+    
+    def get_total_price(self):
+        return self.price
+    
+    get_total_price.short_description = "Total Price"

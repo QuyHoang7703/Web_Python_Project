@@ -4,49 +4,51 @@
 {% endblock banner_slider %}
 {% block detail-content %} 
 <div class="row">
-    {% for size in product_sizes %}
-    {% if forloop.first %}
-    <div style="display:flex;">
-        <div class="col-lg-3" style="width: 950px;">
-            <img class="thumbnail" src="/static/{{size.product.image}}" style="width: 900px; height: auto; margin-left:10px; margin-bottom:10px;">
-        </div>
-        <div>
-            <h4>{{ size.product.name}}</h4>
-            <h4 id="total" style="color: #cc0000;">{{ size.product.price}} VNĐ</h4>
-            <div style="display:flex;">
-                <div class="input-group mb-3">
-                    {% for size in product_sizes %}                                 
-                    <div class="vcl"  style="display:flex; margin-left:5px;">
-                        <span class="border mr-3" onclick="toggleSelected(this)">
-                         {{ size.size.name}}
-                        </span>
-    
-                </div>
-                {% endfor %}               
+    <form id="add-to-cart-form" method="POST" action="{% url 'addcart' %}">
+        {% csrf_token %}
+        {% for size in product_sizes %}
+        {% if forloop.first %}
+        <div style="display:flex;">
+            <div class="col-lg-3" style="width: 950px;">
+                <img class="thumbnail" src="/static/{{ size.product.image }}" style="width: 900px; height: auto; margin-left:10px; margin-bottom:10px;">
             </div>
-            <h5 id="quantity" style="position:relative; right:140px; top:10px; width:300px;" >Còn {{size.quantity}} sản phẩm</h5>
-            </div>
-
-                        <div class="d-flex" style="width:300px;"> 
-                            <div class="input-spinner">
-                                <input type="number" class="form-control" id="input-spinner" value="1" min="1" oninput="updateTotal()">
-                            </div>
-                            <div class="btn-group ml-3 flex-fill action-buttons">
-                                <button class="btn btn-add-to-cart flex-fill" type="button">
-                                    <i class="fa fa-shopping-cart"></i> THÊM VÀO GIỎ
-                                </button>           
-                            </div>
+            <div>
+                <h4>{{ size.product.name }}</h4>
+                <h4 id="total" style="color: #cc0000;">{{ size.product.price }} VNĐ</h4>
+                <div style="display:flex;">
+                    <div class="input-group mb-3">
+                        {% for size in product_sizes %}
+                        <div class="vcl" style="display:flex; margin-left:5px;">
+                            <span class="border mr-3" onclick="toggleSelected(this)" data-size-id="{{ size.id }}">
+                                {{ size.size.name }}
+                            </span>
                         </div>
-    </div>
-    </div>
+                        {% endfor %}
+                    </div>
+                    <h5 id="quantity" style="position:relative; right:140px; top:10px; width:300px;">Còn {{ size.quantity }} sản phẩm</h5>
+                </div>
 
-    {% endif %}
-    {% endfor %}
+                <input type="hidden" name="product_id" value="{{ size.product.id }}">
+                <input type="hidden" name="size_id" id="size_id">
+                <input type="hidden" name="quantity" id="quantity" value = "1">
+                <div class="d-flex" style="width:300px;">
+                    <div class="input-spinner">
+                        <input type="number" class="form-control" name="quantity" id="input-spinner" value="1" min="1" oninput="updateTotal()">
+                    </div>
+                    <div class="btn-group ml-3 flex-fill action-buttons">
+                        <button class="btn btn-add-to-cart flex-fill" type="submit" onclick = test() "{% url 'addcart' %}">
+                            <i class="fa fa-shopping-cart"></i> THÊM VÀO GIỎ
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        {% endfor %}
+    </form>
 </div>
 
 <style>
-
-
     .input-spinner input {
         width: 60px;
         text-align: center;
@@ -57,52 +59,52 @@
         color: white;
     }
 
-
     .action-buttons .btn-add-to-cart:hover {
         background-color: #002244;
     }
-.selected {
-        border-color:blue !important;
-        color: blue;    
+    
+    .selected {
+        border-color: blue !important;
+        color: blue;
         font-size: 18px;
     }
 
-.vcl span {
-    cursor: pointer;                            
-      }
+    .vcl span {
+        cursor: pointer;
+    }
 </style>
 
 <script>
+    document.getElementById("quantity").value = 1
     function updateTotal() {
-    var quantity = document.getElementById("input-spinner").value;
-    {% for size in product_sizes %}
-    {% if forloop.first %}
-    var pricePerItem = parseFloat("{{ size.product.price }}"); // Giá mỗi sản phẩm, chuyển về số thực
-    var total = quantity * pricePerItem;
-    
-    document.getElementById("total").textContent =total.toFixed(2) + " VNĐ"; // Định dạng tiền VNĐ
-    {% endif %}
-    {% endfor %}
-}
+        var quantity = document.getElementById("input-spinner").value;
+        {% for size in product_sizes %}
+        {% if forloop.first %}
+        var pricePerItem = parseFloat("{{ size.product.price }}"); // Giá mỗi sản phẩm, chuyển về số thực
+        var total = quantity * pricePerItem;
+        
+        document.getElementById("total").textContent = total.toFixed(2) + " VNĐ"; // Định dạng tiền VNĐ
+        {% endif %}
+        {% endfor %}
+        document.getElementById("quantity").value = quantity;
+    }
 
-function toggleSelected(element) {
+    function toggleSelected(element) {
         document.querySelectorAll('.mr-3').forEach(function(el) {
             el.classList.remove('selected');
         });
         element.classList.add('selected');
         var size_shoes = element.textContent.trim();
+        document.getElementById("size_id").value = size_shoes;
         {% for size in product_sizes %}
-        if(size_shoes === "{{size.size.name}}"){
-        document.getElementById("quantity").textContent = "Còn " + "{{size.quantity}} " + "sản phẩm";
+        if (size_shoes === "{{ size.size.name }}") {
+            document.getElementById("quantity").textContent = "Còn " + "{{ size.quantity }} " + "sản phẩm";
         }
-    {% endfor %}
+        {% endfor %}
+    }
+
+    function test(){
         
     }
-function vcl(){
-    
-}
 </script>
-
-
-
-{% endblock detail-content %} 
+{% endblock detail-content %}

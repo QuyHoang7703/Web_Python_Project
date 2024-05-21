@@ -47,10 +47,19 @@ class ProductSize_Admin(admin.ModelAdmin):
     def avatar(self, product_size):
         return mark_safe("<img src='/static/{img_url}' alt ='{alt}' width='110px'/>".format(img_url=product_size.product.image.name, alt=product_size.product.image.name))
 
+class Cart_Admin(admin.ModelAdmin):
+    list_display = ["customer", "product", "size", "quantity", "price", "status", "get_total_price"]
+    search_fields = ["customer__name", "product__name", "size"]
+    list_filter = ["status", "product__category"]
+    list_per_page = 10
 
+    def get_total_price(self, obj):
+        return obj.get_total_price()
+    
 # admin.site.register(User, User_Admin)
 admin.site.register(Customer, Customer_Admin)
 admin.site.register(Category, Category_Admin)
 admin.site.register(Product, Product_Admin)
 admin.site.register(Size, Size_Admin)
 admin.site.register(ProductSize, ProductSize_Admin)
+admin.site.register(Cart, Cart_Admin)

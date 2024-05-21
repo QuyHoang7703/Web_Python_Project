@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404  
 from .models import *
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm, PasswordChangeForm
@@ -11,6 +11,11 @@ from django.http import HttpResponseRedirect
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import AnonymousUser
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+import json
+from django.views.decorators.http import require_POST
+
 def register(request):
     if request.method == "POST":
         form = CreateFormRegister(request.POST)
@@ -196,4 +201,106 @@ def detail_product(request):
         product_id = request.GET['detail']
         product_sizes = ProductSize.objects.filter(product_id=product_id) 
         return render(request, 'detail_product.html', {'product_sizes': product_sizes})
+
     
+def cart(request):
+    user_name = request.session.get('user_name')
+    customer = get_object_or_404(Customer, user=User.objects.get(username=user_name))
+    cart_items = Cart.objects.filter(customer=customer, status=False)
+
+    total_price = sum(item.get_total_price() for item in cart_items)
+
+    context = {
+        'cart_items': cart_items,
+        'total_price': total_price
+    }
+    return render(request, 'cart.html', context)
+
+def addcart(request):
+    if request.method == 'POST':
+        # Lấy user_id từ session
+        user_name = request.session.get('user_name')
+        
+        # Lấy hoặc tạo instance của Customer từ user_name
+        customer, _ = Customer.objects.get_or_create(user=User.objects.get(username=user_name))
+        
+        if customer:
+            product_id = request.POST.get('product_id')
+            size_name = request.POST.get('size_id')
+            quantity = int(request.POST.get('quantity', 1))
+
+            product = get_object_or_404(Product, id=product_id)
+            price = product.price * quantity
+
+            # Tạo giỏ hàng chỉ khi có customer
+            cart_item, created = Cart.objects.get_or_create(
+                customer=customer,
+                product=product,
+                size=size_name,
+                status = 0,
+                defaults={'quantity': quantity, 'price': price}
+            )
+
+            if not created:
+                cart_item.quantity += quantity
+                cart_item.price += price
+                cart_item.save()
+
+    return redirect('home')
+
+def checkout(request):
+    # Xử lý logic thanh toán ở đây
+    # Ví dụ: Tạo hóa đơn, xử lý thanh toán, vv.
+    # Sau khi xử lý thành công, có thể chuyển hướng người dùng đến trang cảm ơn hoặc trang chính.
+    messages.success(request, 'Thanh toán thành công!')
+    return redirect('home')
+
+def payment(request):
+    if request.method == 'POST':
+        # Lấy user_name từ session
+        user_name = request.session.get('user_name')
+        
+        # Lấy hoặc tạo instance của Customer từ user_name
+        customer, _ = Customer.objects.get_or_create(user=User.objects.get(username=user_name))
+        
+        if customer:
+            # Lấy ra tất cả các mục trong giỏ hàng của khách hàng
+            cart_items = Cart.objects.filter(customer=customer, status=False)
+            
+            # Đánh dấu các mục trong giỏ hàng là đã thanh toán
+            for item in cart_items:
+                item.status = True
+                item.save()
+                 # Lấy sản phẩm tương ứng của mục trong giỏ hàng
+                # Lấy thông tin về sản phẩm kích thước tương ứng
+                size_obj = Size.objects.get(name=item.size)
+
+                product_size = ProductSize.objects.get(product=item.product, size=size_obj.id)
+
+                # Trừ đi số lượng đã thanh toán để cập nhật số lượng tồn kho
+                product_size.quantity -= item.quantity
+                product_size.save()
+            return redirect('cart')
+    else:
+        # Xử lý khi không phải là phương thức POST
+        # Có thể cần xử lý báo lỗi hoặc chuyển hướng đến trang khác
+        pass
+
+def remove_from_cart(request, cart_item_id):
+    # Xác định sản phẩm cần xóa từ giỏ hàng
+    cart_item = get_object_or_404(Cart, id=cart_item_id)
+    # Xóa sản phẩm khỏi giỏ hàng
+    cart_item.delete()
+    messages.success(request, 'Sản phẩm đã được xóa khỏi giỏ hàng.')
+    return redirect('cart')  # Chuyển hướng người dùng đến trang giỏ hàng sau khi xóa
+
+def recalculate_cart_total(request):
+    if request.method == 'POST':
+        # Tính toán lại tổng giá trị của giỏ hàng ở đây
+        user_name = request.session.get('user_name')
+        customer = get_object_or_404(Customer, user=User.objects.get(username=user_name))
+        cart_items = Cart.objects.filter(customer=customer, status=False)
+
+        total_price = sum(item.get_total_price() for item in cart_items)
+        # Trả về tổng giá trị dưới dạng JSON
+        return JsonResponse({'total_price': total_price})
