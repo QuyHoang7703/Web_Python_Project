@@ -255,36 +255,36 @@ def checkout(request):
     messages.success(request, 'Thanh toán thành công!')
     return redirect('home')
 
-def payment(request):
-    if request.method == 'POST':
-        # Lấy user_name từ session
-        user_name = request.session.get('user_name')
+# def payment(request):
+#     if request.method == 'POST':
+#         # Lấy user_name từ session
+#         user_name = request.session.get('user_name')
         
-        # Lấy hoặc tạo instance của Customer từ user_name
-        customer, _ = Customer.objects.get_or_create(user=User.objects.get(username=user_name))
+#         # Lấy hoặc tạo instance của Customer từ user_name
+#         customer, _ = Customer.objects.get_or_create(user=User.objects.get(username=user_name))
         
-        if customer:
-            # Lấy ra tất cả các mục trong giỏ hàng của khách hàng
-            cart_items = Cart.objects.filter(customer=customer, status=False)
+#         if customer:
+#             # Lấy ra tất cả các mục trong giỏ hàng của khách hàng
+#             cart_items = Cart.objects.filter(customer=customer, status=False)
             
-            # Đánh dấu các mục trong giỏ hàng là đã thanh toán
-            for item in cart_items:
-                item.status = True
-                item.save()
-                 # Lấy sản phẩm tương ứng của mục trong giỏ hàng
-                # Lấy thông tin về sản phẩm kích thước tương ứng
-                size_obj = Size.objects.get(name=item.size)
+#             # Đánh dấu các mục trong giỏ hàng là đã thanh toán
+#             for item in cart_items:
+#                 item.status = True
+#                 item.save()
+#                  # Lấy sản phẩm tương ứng của mục trong giỏ hàng
+#                 # Lấy thông tin về sản phẩm kích thước tương ứng
+#                 size_obj = Size.objects.get(name=item.size)
 
-                product_size = ProductSize.objects.get(product=item.product, size=size_obj.id)
+#                 product_size = ProductSize.objects.get(product=item.product, size=size_obj.id)
 
-                # Trừ đi số lượng đã thanh toán để cập nhật số lượng tồn kho
-                product_size.quantity -= item.quantity
-                product_size.save()
-            return redirect('cart')
-    else:
-        # Xử lý khi không phải là phương thức POST
-        # Có thể cần xử lý báo lỗi hoặc chuyển hướng đến trang khác
-        pass
+#                 # Trừ đi số lượng đã thanh toán để cập nhật số lượng tồn kho
+#                 product_size.quantity -= item.quantity
+#                 product_size.save()
+#             return redirect('cart')
+#     else:
+#         # Xử lý khi không phải là phương thức POST
+#         # Có thể cần xử lý báo lỗi hoặc chuyển hướng đến trang khác
+#         pass
 
 def remove_from_cart(request, cart_item_id):
     # Xác định sản phẩm cần xóa từ giỏ hàng
@@ -304,3 +304,41 @@ def recalculate_cart_total(request):
         total_price = sum(item.get_total_price() for item in cart_items)
         # Trả về tổng giá trị dưới dạng JSON
         return JsonResponse({'total_price': total_price})
+    
+def payment(request):
+    if request.method == 'POST':
+        user_name = request.session.get('user_name')
+        customer, _ = Customer.objects.get_or_create(user=User.objects.get(username=user_name))
+        
+        if customer:
+            cart_items = Cart.objects.filter(customer=customer, status=False)
+            total_price = 0
+            cart_item_ids = []
+
+            for item in cart_items:
+                total_price += item.get_total_price()
+                cart_item_ids.append(str(item.id))
+                
+                # Cập nhật số lượng sản phẩm trong ProductSize
+                size = Size.objects.get(name=item.size)
+                product_size = ProductSize.objects.get(product=item.product, size=size)
+                product_size.quantity -= item.quantity
+                product_size.save()
+                
+                # Đánh dấu các mục trong giỏ hàng là đã thanh toán
+                item.status = True
+                item.save()
+            
+            # Tạo bản ghi hóa đơn
+            cart_item_ids_str = ','.join(cart_item_ids)
+            bill = Bill(user=customer.user, total_price=total_price, date=timezone.now(), cart_item_ids=cart_item_ids_str)
+            bill.save()
+            
+            messages.success(request, 'Thanh toán thành công!')
+            return redirect('home')
+        else:
+            messages.error(request, 'Khách hàng không tồn tại')
+            return redirect('cart')
+    else:
+        messages.error(request, 'Yêu cầu không hợp lệ')
+        return redirect('cart')

@@ -1,30 +1,6 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 from django.db import models
 from django.contrib.auth.models import User
-
+from django.utils import timezone
 
 class Customer(models.Model):
     user = models.OneToOneField(User, on_delete=models.SET_NULL, null=True, blank=False)
@@ -85,3 +61,12 @@ class Cart(models.Model):
         return self.price
     
     get_total_price.short_description = "Total Price"
+
+class Bill(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    total_price = models.FloatField()
+    date = models.DateTimeField(default=timezone.now)  # Sử dụng timezone từ Django
+    cart_item_ids = models.CharField(max_length=255)  # Thêm trường này để lưu các id_cart
+    
+    def __str__(self):
+        return f'Bill {self.id} for {self.user.username}'
