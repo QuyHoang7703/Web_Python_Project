@@ -160,10 +160,10 @@
            
           </div>
           <div class="col">
-            {% if user.is_authenticated %}
+            {% if request.session.user_name %}
                 <a href="/cart" class="text-danger"><strong>Xem Giỏ hàng</strong></a>
             {% else %}
-                <a href="/login" class="text-danger"><strong>Xem Giỏ hàng</strong></a>
+               <a href="{% url 'login' %}?next=/cart" class="text-danger"><strong>Xem Giỏ hàng</strong></a>
             {% endif %}
           </div>        
           <div class="col">
