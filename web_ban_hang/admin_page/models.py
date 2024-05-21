@@ -65,8 +65,26 @@ class Cart(models.Model):
 class Bill(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     total_price = models.FloatField()
-    date = models.DateTimeField(default=timezone.now)  # Sử dụng timezone từ Django
-    cart_item_ids = models.CharField(max_length=255)  # Thêm trường này để lưu các id_cart
+    date = models.DateTimeField(default=timezone.now)
+    cart_items = models.ManyToManyField(Cart, related_name='bills')
+
+    class Meta:
+        verbose_name = "Bill"
+        verbose_name_plural = "Bills"
+        ordering = ['-date']
     
     def __str__(self):
         return f'Bill {self.id} for {self.user.username}'
+    
+    def get_username(self):
+        return self.user.username
+    
+    def get_products(self):
+        return ', '.join([f"{item.product.name} ({item.size})" for item in self.cart_items.all()])
+    
+    def get_total_price(self):
+        return self.total_price
+    
+    get_username.short_description = "User Name"
+    get_products.short_description = "Products and Sizes"
+    get_total_price.short_description = "Total Price"

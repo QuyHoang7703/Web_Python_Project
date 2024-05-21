@@ -55,6 +55,25 @@ class Cart_Admin(admin.ModelAdmin):
 
     def get_total_price(self, obj):
         return obj.get_total_price()
+
+class Bill_Admin(admin.ModelAdmin):
+    list_display = ["id", "get_username", "get_products", "total_price", "date"]
+    search_fields = ["user__username", "cart_item_ids"]
+    list_filter = ["date"]
+    list_per_page = 10
+    
+    def get_username(self, obj):
+        return obj.get_username()
+    
+    def get_products(self, obj):
+        return obj.get_products()
+    
+    def get_total_price(self, obj):
+        return obj.get_total_price()
+    
+    get_username.short_description = "User Name"
+    get_products.short_description = "Products and Sizes"
+    get_total_price.short_description = "Total Price"
     
 # admin.site.register(User, User_Admin)
 admin.site.register(Customer, Customer_Admin)
@@ -63,3 +82,4 @@ admin.site.register(Product, Product_Admin)
 admin.site.register(Size, Size_Admin)
 admin.site.register(ProductSize, ProductSize_Admin)
 admin.site.register(Cart, Cart_Admin)
+admin.site.register(Bill,Bill_Admin)

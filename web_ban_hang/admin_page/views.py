@@ -197,10 +197,14 @@ def change_password(request):
 
 
 def detail_product(request):
+    user_name = None
+    if 'user_name' in request.session:
+        user_name = request.session.get('user_name')
     if 'detail' in request.GET:
         product_id = request.GET['detail']
         product_sizes = ProductSize.objects.filter(product_id=product_id) 
-        return render(request, 'detail_product.html', {'product_sizes': product_sizes})
+        
+        return render(request, 'detail_product.html', {'product_sizes': product_sizes , 'user_name' : user_name})
 
     
 def cart(request):
@@ -212,7 +216,8 @@ def cart(request):
 
     context = {
         'cart_items': cart_items,
-        'total_price': total_price
+        'total_price': total_price,
+        'user_name' : user_name
     }
     return render(request, 'cart.html', context)
 
@@ -287,8 +292,11 @@ def addcart(request):
                 cart_item.quantity += quantity
                 cart_item.price += price
                 cart_item.save()
+                
+            messages.success(request, 'Product added to cart successfully!')
             return redirect('home')
         else:
+            messages.warning(request, 'You need to log in first.')
             return redirect('login')
     else:
         return redirect('home')
@@ -375,9 +383,8 @@ def payment(request):
                 item.save()
             
             # Tạo bản ghi hóa đơn
-            cart_item_ids_str = ','.join(cart_item_ids)
-            bill = Bill(user=customer.user, total_price=total_price, date=timezone.now(), cart_item_ids=cart_item_ids_str)
-            bill.save()
+            bill = Bill.objects.create(user=customer.user, total_price=total_price)
+            bill.cart_items.set(cart_items)
             
             messages.success(request, 'Thanh toán thành công!')
             return redirect('home')

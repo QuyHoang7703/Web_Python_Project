@@ -6,6 +6,13 @@
 
 {% block cart-content %}
 <div class="row">
+    {% if messages %}
+    <ul class="messages">
+        {% for message in messages %}
+            <li class="{{ message.tags }}">{{ message }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
     <section id="cart-container" class="container my-5">
         <table width="100%">
             <thead>
@@ -114,7 +121,8 @@
             fetch(`/remove_from_cart/${itemId}/`, {
                 method: 'POST',
                 headers: {
-                    'X-CSRFToken': '{{ csrf_token }}'  // Thêm CSRF token vào header của yêu cầu
+                    'X-CSRFToken': '{{ csrf_token }}',  // Thêm CSRF token vào header của yêu cầu
+                    'Content-Type': 'application/json'
                 }
             })
             .then(response => {
@@ -123,6 +131,7 @@
                     let row = document.getElementById(`cart-item-${itemId}`);
                     row.parentNode.removeChild(row);
                     recalculateCartTotal();
+                    alert('Sản phẩm đã được xóa khỏi giỏ hàng.');
                 } else {
                     console.error('Xóa sản phẩm thất bại.');
                 }
@@ -152,10 +161,12 @@
         fetch('/payment/', {
             method: 'POST',
             headers: {
-                'X-CSRFToken': '{{ csrf_token }}'  // Thêm CSRF token vào header của yêu cầu
+                'X-CSRFToken': '{{ csrf_token }}' , // Thêm CSRF token vào header của yêu cầu
+                'Content-Type': 'application/json'
             }
         })
         .then(response => {
+            alert("Thanh toán thành công")
             window.location.href = '/cart';
             if (response.ok) {
                 return response.json();
