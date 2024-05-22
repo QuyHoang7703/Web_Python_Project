@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404  
 from .models import *
 from django.core.exceptions import ObjectDoesNotExist
-from django.contrib.auth.forms import UserCreationForm, AuthenticationForm, PasswordChangeForm
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm, PasswordChangeForm, PasswordResetForm
 from django.contrib.auth import authenticate, login as auth_login, update_session_auth_hash
 from django.contrib.auth import logout as auth_logout
 from django.urls import reverse
@@ -15,6 +15,13 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import json
 from django.views.decorators.http import require_POST
+from django.template.loader import render_to_string
+from django.utils.http import urlsafe_base64_encode
+from django.utils.encoding import force_bytes
+from django.contrib.auth.tokens import default_token_generator
+from django.utils.translation import gettext as _
+from django.conf import settings
+from django.core.mail import send_mail
 
 def register(request):
     if request.method == "POST":
@@ -77,7 +84,10 @@ def login(request):
                 # return HttpResponseRedirect(reverse('home') + '?username=' + user.username)
                 return redirect(reverse('home'))
                 # return render(request, "admin_page/home.html")
-          
+            else:
+                messages.error(request, "Tài khoản hoặc mật khẩu không chính xác")
+        else:
+            messages.error(request, "Vui lòng điền đầy đủ thông tin")
     else:        
         form = AuthenticationForm()
     return render(request, "login.html")
@@ -222,38 +232,41 @@ def cart(request):
     }
     return render(request, 'cart.html', context)
 
-# def addcart(request):
-#     if request.method == 'POST':
-#         # Lấy user_id từ session
-#         user_name = request.session.get('user_name')
-        
-#         # Lấy hoặc tạo instance của Customer từ user_name
-#         customer, _ = Customer.objects.get_or_create(user=User.objects.get(username=user_name))
-        
-#         if customer:
-#             product_id = request.POST.get('product_id')
-#             size_name = request.POST.get('size_id')
-#             quantity = int(request.POST.get('quantity', 1))
+def password_reset_request(request):
+    if request.method == "POST":
+        password_form = PasswordResetForm(request.POST)
+        if password_form.is_valid():
+            email = password_form.cleaned_data['email']
+            associated_users = User.objects.filter(email=email)
+            if associated_users.exists():
+                for user in associated_users:
+                    subject = _("Password Reset Requested")
+                    email_template_name = "password_reset_email.txt"
+                    c = {
+                        "email": user.email,
+                        'domain': request.META['HTTP_HOST'],
+                        'site_name': 'Your Site',
+                        "uid": urlsafe_base64_encode(force_bytes(user.pk)),
+                        "user": user,
+                        'token': default_token_generator.make_token(user),
+                        'protocol': 'http',
+                    }
+                    email = render_to_string(email_template_name, c)
+                    try:
+                        send_mail(subject, email, settings.DEFAULT_FROM_EMAIL, [user.email], fail_silently=False)
+                    except Exception as e:
+                        return HttpResponse(f'Invalid header found: {e}')
+                return redirect("/password_reset/done/")
+        else:
+            messages.error(request, "Vui lòng nhập email!")
+    else:
+        password_form = PasswordResetForm()
 
-#             product = get_object_or_404(Product, id=product_id)
-#             price = product.price * quantity
+    context = {
+        "password_form": password_form,
+    } 
 
-#             # Tạo giỏ hàng chỉ khi có customer
-#             cart_item, created = Cart.objects.get_or_create(
-#                 customer=customer,
-#                 product=product,
-#                 size=size_name,
-#                 status = 0,
-#                 defaults={'quantity': quantity, 'price': price}
-#             )
-
-#             if not created:
-#                 cart_item.quantity += quantity
-#                 cart_item.price += price
-#                 cart_item.save()
-#             return redirect('home')
-#         else:
-#             return redirect('login')
+    return render(request, "password_reset_form.html", context=context)
 
 def addcart(request):
     if request.method == 'POST':
