@@ -134,7 +134,7 @@
     
       <div class="col-md-2">
         <div class="row">
-          <div class="col-3" style="margin-top:25px; margin-left:40px; font-size: 35px;">
+          <div class="col-3" style="margin-top:25px; margin-left:5px; font-size: 35px;">
             <div class="text-danger">
 
               <i class="fa-regular fa-circle-user"></i>
@@ -145,21 +145,28 @@
             {% if user_name%}
               <br>Xin chào! {{user_name}}</br>
             {% else %}
-              <a href = {% url "login" %}><strong class="text-danger">Đăng nhập</strong></a>
+              <a href = {% url "login" %}><strong class="text-danger"  style="position: relative; top:37px; right:10px; text-decoration: none;">Đăng nhập</strong></a>
             {% endif %}
           </div>
         </div>
+
+
+
+
+
+
+
       </div>
-      <div class="col-md">
+      <div class="col-md-2">
         <div class="row">
           <div class="col-3" style="margin-top:25px; font-size: 35px;">
-            <div class="text-danger">
+            <div class="text-danger" style="position: relative; right:55px;">
 
               <i class="fa-solid fa-cart-plus"></i>
             </div>
            
           </div>
-          <div class="col">
+          <div class="col-8" style="position: relative; top:35px; right:60px;">
             {% if request.session.user_name %}
                 <a href="/cart" class="text-danger"><strong>Xem Giỏ hàng</strong></a>
             {% else %}
@@ -168,13 +175,11 @@
           </div>        
           <div class="col">
             {% if user_name%}
-            <br>Xem</br>
             {% comment %} <a href= {% url "logout" %}><strong class="text-danger">Đăng xuất</strong></a> {% endcomment %}
             {% endif%}
           </div> 
           {% if user_name%}
-            <div class="col">
-              {% comment %} <br>Xem</br> {% endcomment %}
+            <div class="col" style="position: relative; bottom:42px; left:15px;">
               <a href= "#!"><strong class="text-danger">Tài khoản</strong></a>
               <div class="hidden-content">
                 <ul>
@@ -193,6 +198,8 @@
 
   </section>
 </form>
+
+{% block login-content %} {% endblock login-content %} 
   <section class="mymainmenu bg-danger">
     <div class="container" style="display: flex; justify-content: space-between; padding:10px; width:80%">
       <a class="menu" href="{% url 'home' %}">Trang chủ</a>
@@ -203,7 +210,7 @@
       <a class="menu" aria-disabled="true" id="new-balance-link">New Balance</a>
       <a class="menu" aria-disabled="true" id="pro-max-link">Pro Max</a>
       <a class="menu" aria-disabled="true" id="mira-link">Mira</a>
-      <a class="menu" aria-disabled="true" id="contact-link">Liên hệ</a>
+      <a class="menu" aria-disabled="true" id="contact-link">Thương hiệu khác</a>
   </div>
           </section>
         </div>
@@ -273,7 +280,7 @@
 						
 						<li class="li_menu"><a href="/tuyen-dung" title="Tuyển dụng">Tuyển dụng</a></li>
 						
-						<li class="li_menu"><a href="/lien-he" title="Liên hệ">Liên hệ</a></li>
+						<li class="li_menu"><a href="/lien-he" title="Liên hệ">Thương hiệu khác</a></li>
 						
 					</ul>
           </div>
@@ -298,7 +305,7 @@
               
               <li class="li_menu"><a href="/tuyen-dung" title="Tuyển dụng">Tuyển dụng</a></li>
               
-              <li class="li_menu"><a href="/lien-he" title="Liên hệ">Liên hệ</a></li>
+              <li class="li_menu"><a href="/lien-he" title="Liên hệ">Thương hiệu khác</a></li>
               
             </ul>
             </div>
@@ -324,7 +331,7 @@
                 
                 <li class="li_menu"><a href="/tuyen-dung" title="Tuyển dụng">Tuyển dụng</a></li>
                 
-                <li class="li_menu"><a href="/lien-he" title="Liên hệ">Liên hệ</a></li>
+                <li class="li_menu"><a href="/lien-he" title="Liên hệ">Thương hiệu khác</a></li>
                 
               </ul>
               </div>
@@ -350,7 +357,7 @@
                   
                   <li class="li_menu"><a href="/tuyen-dung" title="Tuyển dụng">Tuyển dụng</a></li>
                   
-                  <li class="li_menu"><a href="/lien-he" title="Liên hệ">Liên hệ</a></li>
+                  <li class="li_menu"><a href="/lien-he" title="Liên hệ">Thương hiệu khác</a></li>
                   
                 </ul>
                 </div>
