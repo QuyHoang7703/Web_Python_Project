@@ -8,7 +8,7 @@
         <div class="box-element product">
             <h6><strong>{{ product_name.name }}</strong></h6>
             <hr>
-            <button class="btn btn-outline-secondary add-btn btn-cart">Thêm vào giỏ hàng</button>
+            {% comment %} <button class="btn btn-outline-secondary add-btn btn-cart">Thêm vào giỏ hàng</button> {% endcomment %}
             <a class="btn btn-outline-success btn-seen" href="{% url 'detail_product' %}?detail={{product_name.id}}">Xem</a>
             <h4 style="display:inline-block; float: right; font-size:16px;"><strong>{{ product_name.price }} VNĐ</strong></h4>
         </div>
