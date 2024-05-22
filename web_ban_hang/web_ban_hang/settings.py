@@ -81,7 +81,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'django-project',
         'USER': 'root',
-        'PASSWORD': '',
+        'PASSWORD': '1234567',
         'HOST': 'localhost'
     }
 }
@@ -129,3 +129,12 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 MEDIA_ROOT = "%s/admin_page/static" % BASE_DIR
+
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'hoangvanquy772003@gmail.com'
+EMAIL_HOST_PASSWORD = 'thup teub gmjd kxvk'
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
