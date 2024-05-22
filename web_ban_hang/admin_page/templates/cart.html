@@ -17,26 +17,32 @@
         <table width="100%">
             <thead>
                 <tr>
+                    <td><input type="checkbox" id="select-all"></td>
                     <td>Remove</td>
                     <td>Image</td>
                     <td>Product</td>
                     <td>Price</td>
                     <td>Quantity</td>
+                    <td>Total</td>
                     <td>Size</td>
                 </tr>
             </thead>
             <tbody>
                 {% for item in cart_items %}
                 <tr id="cart-item-{{ item.id }}">
+                    <td><input type="checkbox" class="item-checkbox" data-id="{{ item.id }}"></td>
                     <td><button onclick="removeFromCart({{ item.id }})"><i class="fas fa-trash-alt"></i></button></td>
                     <td><img src="/static/{{ item.product.image }}" alt="{{ item.product.name }}"></td>
                     <td>
                         <p class="product-name">{{ item.product.name }}</p>
                     </td>
                     <td>
-                        <h5>{{ item.product.price }} VNĐ</h5>
+                        <h5>{{  item.product.price }} VNĐ</h5>
                     </td>
                     <td>{{ item.quantity }}</td>
+                    <td>
+                        <h5>{{ item.price }} VNĐ</h5>
+                    </td>
                     <td>
                         <h5>{{ item.size }}</h5>
                     </td>
@@ -44,6 +50,7 @@
                 {% endfor %}
             </tbody>
         </table>
+        {% comment %} <button onclick="removeSelectedItems()">Remove Selected Items</button> {% endcomment %}
     </section>
     <div class="total col-lg-6 col-md-6 col-12">
         <div>
@@ -53,7 +60,7 @@
             <h6>Total</h6>
             <p id="cart-total-price">{{ total_price }} VNĐ</p>
           </div>
-          <button  onclick="payment()">THANH TOÁN</button>
+          <button onclick="payment()">THANH TOÁN</button>
         </div>
     </div>
 </div>
@@ -82,15 +89,18 @@
         text-align: center;
     }
     #cart-container table td:nth-child(1) {
+        width: 50px;
+    }
+    #cart-container table td:nth-child(2) {
         width: 100px;
     }
-    #cart-container table td:nth-child(2),
-    #cart-container table td:nth-child(3) {
+    #cart-container table td:nth-child(3),
+    #cart-container table td:nth-child(4) {
         width: 200px;
     }
-    #cart-container table td:nth-child(4),
-    #cart-container table td:nth-child(5), 
-    #cart-container table td:nth-child(6) {
+    #cart-container table td:nth-child(5),
+    #cart-container table td:nth-child(6), 
+    #cart-container table td:nth-child(7) {
         width: 170px;
     }
     #cart-container table tbody img {
@@ -116,18 +126,24 @@
     }
 </style>
 <script>
+    document.getElementById('select-all').addEventListener('change', function() {
+        const checkboxes = document.querySelectorAll('.item-checkbox');
+        checkboxes.forEach(checkbox => {
+            checkbox.checked = this.checked;
+        });
+    });
+
     function removeFromCart(itemId) {
         if (confirm("Bạn có chắc muốn xóa sản phẩm này khỏi giỏ hàng?")) {
             fetch(`/remove_from_cart/${itemId}/`, {
                 method: 'POST',
                 headers: {
-                    'X-CSRFToken': '{{ csrf_token }}',  // Thêm CSRF token vào header của yêu cầu
+                    'X-CSRFToken': '{{ csrf_token }}',
                     'Content-Type': 'application/json'
                 }
             })
             .then(response => {
                 if (response.ok) {
-                    // Xóa sản phẩm khỏi DOM
                     let row = document.getElementById(`cart-item-${itemId}`);
                     row.parentNode.removeChild(row);
                     recalculateCartTotal();
@@ -141,51 +157,69 @@
             });
         }
     }
+
+    function removeSelectedItems() {
+        const selectedItems = document.querySelectorAll('.item-checkbox:checked');
+        if (selectedItems.length > 0) {
+            if (confirm("Bạn có chắc muốn xóa các sản phẩm đã chọn khỏi giỏ hàng?")) {
+                selectedItems.forEach(checkbox => {
+                    removeFromCart(checkbox.dataset.id);
+                });
+            }
+        } else {
+            alert('Không có sản phẩm nào được chọn.');
+        }
+    }
+
     function recalculateCartTotal() {
         fetch('/recalculate_cart_total/', {
             method: 'POST',
             headers: {
-                'X-CSRFToken': '{{ csrf_token }}'  // Thêm CSRF token vào header của yêu cầu
+                'X-CSRFToken': '{{ csrf_token }}'
             }
         })
         .then(response => response.json())
         .then(data => {
-            // Cập nhật lại tổng giá trị trong DOM
             document.querySelector('#cart-total-price').textContent = `${data.total_price} VNĐ`;
         })
         .catch(error => {
             console.error('Lỗi khi tính toán lại tổng giá trị giỏ hàng:', error);
         });
     }
+
     function payment() {
+        const selectedItems = document.querySelectorAll('.item-checkbox:checked');
+        const itemIds = Array.from(selectedItems).map(checkbox => checkbox.dataset.id);
+
+        if (itemIds.length === 0) {
+            alert('Không có sản phẩm nào được chọn để thanh toán.');
+            return;
+        }
+
         fetch('/payment/', {
             method: 'POST',
             headers: {
-                'X-CSRFToken': '{{ csrf_token }}' , // Thêm CSRF token vào header của yêu cầu
+                'X-CSRFToken': '{{ csrf_token }}',
                 'Content-Type': 'application/json'
-            }
+            },
+            body: JSON.stringify({ item_ids: itemIds })
         })
         .then(response => {
-            alert("Thanh toán thành công")
-            window.location.href = '/cart';
             if (response.ok) {
+                alert("Thanh toán thành công");
+                window.location.href = '/cart';
                 return response.json();
             } else {
                 throw new Error('Lỗi khi gửi yêu cầu thanh toán');
             }
         })
         .then(data => {
-            // Cập nhật lại tổng giá trị trong DOM
             document.querySelector('#cart-total-price').textContent = `${data.total_price} VNĐ`;
-            // Hiển thị thông báo thành công
             alert('Thanh toán thành công!');
         })
         .catch(error => {
             console.error('Lỗi khi thực hiện thanh toán:', error);
-            // Hiển thị thông báo lỗi
-            showAlert('Có lỗi xảy ra trong quá trình thanh toán. Vui lòng thử lại sau.');
         });
     }
-    
 </script>
 {% endblock cart-content %}

@@ -213,7 +213,8 @@ def cart(request):
     cart_items = Cart.objects.filter(customer=customer, status=False)
 
     total_price = sum(item.get_total_price() for item in cart_items)
-
+    for item in cart_items:
+        item.unit_price = item.price / item.quantity
     context = {
         'cart_items': cart_items,
         'total_price': total_price,
@@ -360,36 +361,49 @@ def recalculate_cart_total(request):
     
 def payment(request):
     if request.method == 'POST':
-        user_name = request.session.get('user_name')
-        customer, _ = Customer.objects.get_or_create(user=User.objects.get(username=user_name))
-        
-        if customer:
-            cart_items = Cart.objects.filter(customer=customer, status=False)
-            total_price = 0
-            cart_item_ids = []
+        try:
+            data = json.loads(request.body)
+            selected_item_ids = data.get('item_ids', [])
+            
+            if not selected_item_ids:
+                messages.error(request, 'Không có sản phẩm nào được chọn để thanh toán.')
+                return redirect('cart')
 
-            for item in cart_items:
-                total_price += item.get_total_price()
-                cart_item_ids.append(str(item.id))
-                
-                # Cập nhật số lượng sản phẩm trong ProductSize
-                size = Size.objects.get(name=item.size)
-                product_size = ProductSize.objects.get(product=item.product, size=size)
-                product_size.quantity -= item.quantity
-                product_size.save()
-                
-                # Đánh dấu các mục trong giỏ hàng là đã thanh toán
-                item.status = True
-                item.save()
+            user_name = request.session.get('user_name')
+            customer, _ = Customer.objects.get_or_create(user=User.objects.get(username=user_name))
             
-            # Tạo bản ghi hóa đơn
-            bill = Bill.objects.create(user=customer.user, total_price=total_price)
-            bill.cart_items.set(cart_items)
-            
-            messages.success(request, 'Thanh toán thành công!')
-            return redirect('home')
-        else:
-            messages.error(request, 'Khách hàng không tồn tại')
+            if customer:
+                cart_items = Cart.objects.filter(customer=customer, status=False, id__in=selected_item_ids)
+                total_price = 0
+                
+                if not cart_items.exists():
+                    messages.error(request, 'Các sản phẩm đã chọn không hợp lệ hoặc không tồn tại.')
+                    return redirect('cart')
+
+                for item in cart_items:
+                    total_price += item.get_total_price()
+                    
+                    # Cập nhật số lượng sản phẩm trong ProductSize
+                    size = Size.objects.get(name=item.size)
+                    product_size = ProductSize.objects.get(product=item.product, size=size)
+                    product_size.quantity -= item.quantity
+                    product_size.save()
+                    
+                    # Đánh dấu các mục trong giỏ hàng là đã thanh toán
+                    item.status = True
+                    item.save()
+                
+                # Tạo bản ghi hóa đơn
+                bill = Bill.objects.create(user=customer.user, total_price=total_price)
+                bill.cart_items.set(cart_items)
+                
+                messages.success(request, 'Thanh toán thành công!')
+                return redirect('home')
+            else:
+                messages.error(request, 'Khách hàng không tồn tại')
+                return redirect('cart')
+        except json.JSONDecodeError:
+            messages.error(request, 'Dữ liệu yêu cầu không hợp lệ')
             return redirect('cart')
     else:
         messages.error(request, 'Yêu cầu không hợp lệ')
