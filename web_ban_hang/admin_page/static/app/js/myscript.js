@@ -106,7 +106,21 @@
 // })
 
 
+setTimeout(function() {
+    document.querySelectorAll('.custom-alert').forEach(function(alert) {
+        alert.classList.remove('show');
+        alert.classList.add('hide');
+    });
+}, 2000);
 
+// Xử lý sự kiện click vào nút tắt
+document.querySelectorAll('.btn-close').forEach(function(button) {
+    button.addEventListener('click', function() {
+        var alert = this.closest('.custom-alert');
+        alert.classList.remove('show');
+        alert.classList.add('hide');
+    });
+});
 
 
 

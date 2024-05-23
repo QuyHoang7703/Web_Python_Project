@@ -70,28 +70,28 @@ def is_super_or_staff(username):
 
 def login(request):
     if request.method == "POST":
-        form = AuthenticationForm(request, request.POST)
+        form = AuthenticationForm(request, data=request.POST)
         if form.is_valid():
             username = form.cleaned_data["username"]
             password = form.cleaned_data["password"]
             user = authenticate(username=username, password=password)
-            if user is not None and is_super_or_staff(username):
-                auth_login(request, user)
-                return redirect(reverse('admin:index'))
-            elif user is not None and not is_super_or_staff(username):
-                request.session['user_name'] = user.username
-                messages.success(request, "Bạn đã đăng nhập thành công.")
-                # return HttpResponseRedirect(reverse('home') + '?username=' + user.username)
-                return redirect(reverse('home'))
-                # return render(request, "admin_page/home.html")
+            if user is not None:
+                if is_super_or_staff(username):
+                    auth_login(request, user)
+                    return redirect(reverse('admin:index'))
+                else:
+                    request.session['user_name'] = user.username    
+                    messages.success(request, "Bạn đã đăng nhập thành công.")
+                    return redirect(reverse('home'))
+        else:
+            if 'username' in form.errors or 'password' in form.errors:
+                messages.error(request, "Vui lòng điền đầy đủ thông tin")
             else:
                 messages.error(request, "Tài khoản hoặc mật khẩu không chính xác")
-        else:
-            messages.error(request, "Vui lòng điền đầy đủ thông tin")
-    else:        
+    else:
         form = AuthenticationForm()
-    return render(request, "login.html")
-    # return render(request, "login.html", context={"form":form})
+
+    return render(request, "login.html", {"form": form})
    
 
 def logout(request):
