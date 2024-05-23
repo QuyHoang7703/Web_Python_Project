@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <!-- css -->
     
-    <link href="{%static 'app/css/owl.carousel.min.css' %}" rel="stylesheet" />
+    <link href="{%static 'app/css/owl.carousel.min.css' %}" rel="stylesheet"/>
     <link href="{%static 'app/css/all.min.css' %}" rel="stylesheet" />
     <link href="{%static 'app/css/main.css' %}" rel="stylesheet" />
     <link href="{%static 'app/css/style.css' %}" rel="stylesheet" />
@@ -111,7 +111,7 @@
       <div class="col-md-3">
         <div class="row">
           <div class="col-4">
-            <img src="{% static 'app/images/Long SHOP.png' %}" width="100" height="100">
+            <img src="{% static 'app/images/longshoes.png' %}" width="100" height="100">
           </div>
           <div class="col" style="margin-top:20px;">
             <h5>LONGSHOES.VN</h5>
@@ -134,7 +134,7 @@
     
       <div class="col-md-2">
         <div class="row">
-          <div class="col-3" style="margin-top:25px; margin-left:40px; font-size: 35px;">
+          <div class="col-3" style="margin-top:25px; margin-left:5px; font-size: 35px;">
             <div class="text-danger">
 
               <i class="fa-regular fa-circle-user"></i>
@@ -142,24 +142,34 @@
            
           </div>
           <div class="col">
-            {% if user_name%}
-              <br>Xin chào! {{user_name}}</br>
+            {% if user_name %}
+            <div style="position: relative; top:13px;">
+
+              <br>{{user_name}}</br>
+            </div>
             {% else %}
-              <a href = {% url "login" %}><strong class="text-danger">Đăng nhập</strong></a>
+              <a href = {% url "login" %}><strong class="text-danger"  style="position: relative; top:37px; right:10px;">Đăng nhập</strong></a>
             {% endif %}
           </div>
         </div>
+
+
+
+
+
+
+
       </div>
-      <div class="col-md">
+      <div class="col-md-2">
         <div class="row">
           <div class="col-3" style="margin-top:25px; font-size: 35px;">
-            <div class="text-danger">
+            <div class="text-danger" style="position: relative; right:55px;">
 
               <i class="fa-solid fa-cart-plus"></i>
             </div>
            
           </div>
-          <div class="col">
+          <div class="col-8" style="position: relative; top:35px; right:60px;">
             {% if request.session.user_name %}
                 <a href="/cart" class="text-danger"><strong>Xem Giỏ hàng</strong></a>
             {% else %}
@@ -168,13 +178,11 @@
           </div>        
           <div class="col">
             {% if user_name%}
-            <br>Xem</br>
             {% comment %} <a href= {% url "logout" %}><strong class="text-danger">Đăng xuất</strong></a> {% endcomment %}
             {% endif%}
           </div> 
           {% if user_name%}
-            <div class="col">
-              {% comment %} <br>Xem</br> {% endcomment %}
+            <div class="col" style="position: relative; bottom:42px; left:15px;">
               <a href= "#!"><strong class="text-danger">Tài khoản</strong></a>
               <div class="hidden-content">
                 <ul>
@@ -193,6 +201,8 @@
 
   </section>
 </form>
+
+
   <section class="mymainmenu bg-danger">
     <div class="container" style="display: flex; justify-content: space-between; padding:10px; width:80%">
       <a class="menu" href="{% url 'home' %}">Trang chủ</a>
@@ -203,12 +213,27 @@
       <a class="menu" aria-disabled="true" id="new-balance-link">New Balance</a>
       <a class="menu" aria-disabled="true" id="pro-max-link">Pro Max</a>
       <a class="menu" aria-disabled="true" id="mira-link">Mira</a>
-      <a class="menu" aria-disabled="true" id="contact-link">Liên hệ</a>
-  </div>
+      <div class="menu">
+      <div class="col">
+        <a class="menu" style="cursor:pointer;">Thương hiệu khác</a>
+        <div class="hidden-content">
+          <ul>
+            {% for br in brand %}
+            {% if br.name_category not in list %}
+            <li><a style="color:black; cursor:pointer;" href="{% url 'filter_product' brand_id=br.name_category %}">{{br.name_category}}</a></li>
+            {% endif %}
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+    </div>
+      </div>
+      
           </section>
+
         </div>
 
-
+        {% block login-content %} {% endblock login-content %} 
       <!-- main body -->
       {% block banner_slider %}
 
@@ -250,6 +275,7 @@
       {% block detail-content %} {% endblock detail-content %}
       {% block cart-content %} {% endblock cart-content %}
       <!-- footer -->
+      {% block footer %}
      <section class="myfooter bg-dark text-white py-4">
       <div class="container">
         <div class="row">
@@ -273,7 +299,7 @@
 						
 						<li class="li_menu"><a href="/tuyen-dung" title="Tuyển dụng">Tuyển dụng</a></li>
 						
-						<li class="li_menu"><a href="/lien-he" title="Liên hệ">Liên hệ</a></li>
+						<li class="li_menu"><a href="/lien-he" title="Liên hệ">Thương hiệu khác</a></li>
 						
 					</ul>
           </div>
@@ -298,7 +324,7 @@
               
               <li class="li_menu"><a href="/tuyen-dung" title="Tuyển dụng">Tuyển dụng</a></li>
               
-              <li class="li_menu"><a href="/lien-he" title="Liên hệ">Liên hệ</a></li>
+              <li class="li_menu"><a href="/lien-he" title="Liên hệ">Thương hiệu khác</a></li>
               
             </ul>
             </div>
@@ -324,7 +350,7 @@
                 
                 <li class="li_menu"><a href="/tuyen-dung" title="Tuyển dụng">Tuyển dụng</a></li>
                 
-                <li class="li_menu"><a href="/lien-he" title="Liên hệ">Liên hệ</a></li>
+                <li class="li_menu"><a href="/lien-he" title="Liên hệ">Thương hiệu khác</a></li>
                 
               </ul>
               </div>
@@ -350,7 +376,7 @@
                   
                   <li class="li_menu"><a href="/tuyen-dung" title="Tuyển dụng">Tuyển dụng</a></li>
                   
-                  <li class="li_menu"><a href="/lien-he" title="Liên hệ">Liên hệ</a></li>
+                  <li class="li_menu"><a href="/lien-he" title="Liên hệ">Thương hiệu khác</a></li>
                   
                 </ul>
                 </div>
@@ -394,7 +420,7 @@
       </div>
 
      </section>
-    
+     {% endblock footer %}
 
      <style>
       .li_menu a{

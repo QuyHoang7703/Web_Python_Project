@@ -24,7 +24,10 @@ from django.conf import settings
 from django.core.mail import send_mail
 
 def register(request):
+    brand = Category.objects.all()
+    list = ['Adidas', 'Jordan', 'Nike', 'Puma', 'New Balance', 'Pro Max', 'Pro Max', 'Mira']
     if request.method == "POST":
+        
         form = CreateFormRegister(request.POST)
         if form.is_valid():
             # Lấy dữ liệu từ form
@@ -37,10 +40,10 @@ def register(request):
             email = form.cleaned_data['email']
             if User.objects.filter(username=username).exists():
                 form.add_error('username', 'Tên tài khoản đã tồn tại')
-                return render(request, "admin_page/register.html", {'form': form})
+                return render(request, "admin_page/register.html", {'form': form,'brand': brand,'list':list})
             if password1 != password2:
                 form.add_error('password2', 'Mật khẩu không khớp nhau')
-                return render(request, "admin_page/register.html", {'form': form})
+                return render(request, "admin_page/register.html", {'form': form,'brand': brand,'list':list})
             
             # Tạo user mới
             user = User.objects.create_user(username=username, password=password1, email=email)
@@ -52,14 +55,14 @@ def register(request):
             # return render(request, "admin_page/home.html")
             request.session['user_name'] = user.username
             messages.success(request, "Bạn đã đăng nhập thành công.")
-            return redirect(reverse('home'), {"username": username})
+            return redirect(reverse('home'), {"username": username,'brand': brand,'list':list})
             # return redirect('home')
         else:
             form.add_error(None, 'Vui lòng điền đầy đủ thông tin')
     else:
         form = CreateFormRegister()
         
-    return render(request, "register.html", context={"form": form})
+    return render(request, "register.html", context={"form": form,'brand': brand,'list':list})
 
 def is_super_or_staff(username):
     try:
@@ -69,6 +72,8 @@ def is_super_or_staff(username):
         return False
 
 def login(request):
+    list = ['Adidas', 'Jordan', 'Nike', 'Puma', 'New Balance', 'Pro Max', 'Pro Max', 'Mira']
+    brand = Category.objects.all()
     if request.method == "POST":
         form = AuthenticationForm(request, data=request.POST)
         if form.is_valid():
@@ -91,7 +96,9 @@ def login(request):
     else:
         form = AuthenticationForm()
 
-    return render(request, "login.html", {"form": form})
+    # return render(request, "login.html", {"form": form})
+    return render(request, "login.html",context={"form": form,'brand': brand,'list':list})
+    # return render(request, "login.html", context={"form":form})
    
 
 def logout(request):
@@ -103,25 +110,37 @@ def logout(request):
 
 
 def home(request):
+    list = ['Adidas', 'Jordan', 'Nike', 'Puma', 'New Balance', 'Pro Max', 'Pro Max', 'Mira']
     products = Product.objects.all()
+    brand = Category.objects.all()
     username = request.session.get("user_name", None)
-    return render(request, 'home.html', {'products': products, 'user_name': username})
+    return render(request, 'home.html', {'products': products, 'user_name': username,'brand': brand,'list':list})
 
 def filter_product(request,brand_id):
+    list = ['Adidas', 'Jordan', 'Nike', 'Puma', 'New Balance', 'Pro Max', 'Pro Max', 'Mira']
     products = Product.objects.filter(category__name_category=brand_id)
-    return render(request,'filter_product.html', {'products': products})
+    brand = Category.objects.all()
+    username = request.session.get("user_name", None)
+    return render(request,'filter_product.html', {'products': products, 'user_name': username, 'brand': brand,'list':list})
 
 
 def search_product(request):
     query = request.GET.get('q')
+    list = ['Adidas', 'Jordan', 'Nike', 'Puma', 'New Balance', 'Pro Max', 'Pro Max', 'Mira']
     if query:
-        product_names = Product.objects.filter(name__icontains=query)           
+        product_names = Product.objects.filter(name__icontains=query)      
+        brand = Category.objects.all()     
+        username = request.session.get("user_name", None)
     else:
         product_names = Product.objects.all()
-    return render(request, 'search_product.html', {'product_names': product_names}) 
+        brand = Category.objects.all()
+        username = request.session.get("user_name", None)
+    return render(request, 'search_product.html', {'product_names': product_names, 'user_name': username, 'brand': brand,'list':list}) 
 
 @login_required
 def view_information(request):
+    list = ['Adidas', 'Jordan', 'Nike', 'Puma', 'New Balance', 'Pro Max', 'Pro Max', 'Mira']
+    brand = Category.objects.all()
     user_name = request.GET.get("user_name", None)
     # print("Username: ", user_name)
     if user_name:
@@ -139,7 +158,9 @@ def view_information(request):
                 "name": name,
                 "address" : address,
                 "phone": phone,
-                "email": email
+                "email": email,
+                'brand': brand,
+                'list':list
             }
         return render(request, "view_information.html", context=context)  
     else:
@@ -169,9 +190,11 @@ def update_information(request):
     return HttpResponse("Không tìm thấy người dùng hoặc thông tin khách hàng tương ứng blo.")
 
 def change_password(request):
+    brand = Category.objects.all()
+    list = ['Adidas', 'Jordan', 'Nike', 'Puma', 'New Balance', 'Pro Max', 'Pro Max', 'Mira']
     if request.method == "GET":
         user_name = request.GET.get("user_name")
-        context = {"user_name": user_name}
+        context = {"user_name": user_name,'brand': brand,'list':list}
         return render(request, "change_password.html", context=context)
     
     if request.method == 'POST':
@@ -207,32 +230,38 @@ def change_password(request):
 
 
 def detail_product(request):
+    list = ['Adidas', 'Jordan', 'Nike', 'Puma', 'New Balance', 'Pro Max', 'Pro Max', 'Mira']
     user_name = None
     if 'user_name' in request.session:
         user_name = request.session.get('user_name')
     if 'detail' in request.GET:
         product_id = request.GET['detail']
         product_sizes = ProductSize.objects.filter(product_id=product_id) 
-        
-        return render(request, 'detail_product.html', {'product_sizes': product_sizes , 'user_name' : user_name})
+        brand = Category.objects.all()
+        return render(request, 'detail_product.html', {'product_sizes': product_sizes , 'user_name' : user_name, 'brand': brand,'list':list})
 
     
 def cart(request):
+    list = ['Adidas', 'Jordan', 'Nike', 'Puma', 'New Balance', 'Pro Max', 'Pro Max', 'Mira']
     user_name = request.session.get('user_name')
     customer = get_object_or_404(Customer, user=User.objects.get(username=user_name))
     cart_items = Cart.objects.filter(customer=customer, status=False)
-
+    brand = Category.objects.all()
     total_price = sum(item.get_total_price() for item in cart_items)
     for item in cart_items:
         item.unit_price = item.price / item.quantity
     context = {
         'cart_items': cart_items,
         'total_price': total_price,
-        'user_name' : user_name
+        'user_name' : user_name,
+        'brand' : brand,
+        'list':list
     }
     return render(request, 'cart.html', context)
 
 def password_reset_request(request):
+    list = ['Adidas', 'Jordan', 'Nike', 'Puma', 'New Balance', 'Pro Max', 'Pro Max', 'Mira']
+    brand = Category.objects.all()
     if request.method == "POST":
         password_form = PasswordResetForm(request.POST)
         if password_form.is_valid():
@@ -264,6 +293,8 @@ def password_reset_request(request):
 
     context = {
         "password_form": password_form,
+        'brand': brand,
+        'list':list
     } 
 
     return render(request, "password_reset_form.html", context=context)
@@ -421,3 +452,5 @@ def payment(request):
     else:
         messages.error(request, 'Yêu cầu không hợp lệ')
         return redirect('cart')
+    
+
