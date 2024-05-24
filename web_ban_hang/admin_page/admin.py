@@ -27,7 +27,7 @@ class Category_Admin(admin.ModelAdmin):
     list_display = ["id", "name_category"]
 
 class Product_Admin(admin.ModelAdmin):
-    list_display = ["id", "category", "name", "price", "avatar"]  
+    list_display = ["id", "category", "name", "price_in_vnd", "avatar"]  
     search_fields = ["name"]
     list_filter = ["category"]
     readonly_fields = ["avatar"]

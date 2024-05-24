@@ -54,7 +54,7 @@ def register(request):
             # Chuyển hướng đến trang thành công hoặc trang chính
             # return render(request, "admin_page/home.html")
             request.session['user_name'] = user.username
-            messages.success(request, "Bạn đã đăng nhập thành công.")
+           
             return redirect(reverse('home'), {"username": username,'brand': brand,'list':list})
             # return redirect('home')
         else:
@@ -72,8 +72,6 @@ def is_super_or_staff(username):
         return False
 
 def login(request):
-    list = ['Adidas', 'Jordan', 'Nike', 'Puma', 'New Balance', 'Pro Max', 'Pro Max', 'Mira']
-    brand = Category.objects.all()
     if request.method == "POST":
         form = AuthenticationForm(request, data=request.POST)
         if form.is_valid():
@@ -96,10 +94,8 @@ def login(request):
     else:
         form = AuthenticationForm()
 
-    # return render(request, "login.html", {"form": form})
-    return render(request, "login.html",context={"form": form,'brand': brand,'list':list})
-    # return render(request, "login.html", context={"form":form})
-   
+    return render(request, "login.html", {"form": form})
+    # return render(request, "login.html",context={"form": form,'brand': brand,'list':list})
 
 def logout(request):
     if "user_name" in request.session:
@@ -137,11 +133,11 @@ def search_product(request):
         username = request.session.get("user_name", None)
     return render(request, 'search_product.html', {'product_names': product_names, 'user_name': username, 'brand': brand,'list':list}) 
 
-@login_required
+# @login_required
 def view_information(request):
-    list = ['Adidas', 'Jordan', 'Nike', 'Puma', 'New Balance', 'Pro Max', 'Pro Max', 'Mira']
-    brand = Category.objects.all()
+    print("bblo")
     user_name = request.GET.get("user_name", None)
+    print("Username: ", user_name)
     # print("Username: ", user_name)
     if user_name:
         print("Username: ", user_name)
@@ -159,8 +155,7 @@ def view_information(request):
                 "address" : address,
                 "phone": phone,
                 "email": email,
-                'brand': brand,
-                'list':list
+              
             }
         return render(request, "view_information.html", context=context)  
     else:
@@ -183,7 +178,7 @@ def update_information(request):
         user.email = email
         customer.save()
         user.save()
-        
+        messages.info(request, "Bạn đã cập nhập thông tin thành công")
         # Redirect to a success page or any other page
         return redirect(reverse("home"))  # Replace 'success_page_url' with the URL of your success page
         
@@ -224,10 +219,8 @@ def change_password(request):
                 messages.error(request, "Mật khẩu mới và xác nhận mật khẩu không trùng khớp")
         else:
             messages.error(request, "Mật khẩu hiện tại không chính xác")
-        
         return redirect(reverse('change_password') + f'?user_name={user_name}')
     
-
 
 def detail_product(request):
     list = ['Adidas', 'Jordan', 'Nike', 'Puma', 'New Balance', 'Pro Max', 'Pro Max', 'Mira']

@@ -22,12 +22,18 @@ class Product(models.Model):
     price = models.FloatField()
     image = models.ImageField(upload_to="products", default=None)
 
+    def price_in_vnd(self):
+        price_vnd = self.price
+        return "{:,.0f} VND".format(price_vnd)
+    
+    price_in_vnd.short_description = "Price"
+
 class Size(models.Model):
     name = models.CharField(max_length=30, null=False, blank=False) 
 
 class ProductSize(models.Model):
-    product = models.ForeignKey(Product, models.SET_NULL, null=True)
-    size = models.ForeignKey(Size, models.SET_NULL, null=True)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    size = models.ForeignKey(Size, on_delete=models.CASCADE)
     quantity = models.IntegerField()
     class Meta:
         unique_together =('product', 'size')
