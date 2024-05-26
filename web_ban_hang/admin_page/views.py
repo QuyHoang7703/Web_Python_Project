@@ -54,7 +54,7 @@ def register(request):
             # Chuyển hướng đến trang thành công hoặc trang chính
             # return render(request, "admin_page/home.html")
             request.session['user_name'] = user.username
-           
+            messages.success(request, "Bạn đã đăng ký thành công.")
             return redirect(reverse('home'), {"username": username,'brand': brand,'list':list})
             # return redirect('home')
         else:
@@ -278,6 +278,7 @@ def password_reset_request(request):
                     try:
                         send_mail(subject, email, settings.DEFAULT_FROM_EMAIL, [user.email], fail_silently=False)
                     except Exception as e:
+                        messages.error("Vui lòng")
                         return HttpResponse(f'Invalid header found: {e}')
                 return redirect("/password_reset/done/")
         else:
@@ -287,7 +288,7 @@ def password_reset_request(request):
 
     context = {
         "password_form": password_form,
-        'brand': brand,
+        # 'brand': brand,
         'list':list
     } 
 
