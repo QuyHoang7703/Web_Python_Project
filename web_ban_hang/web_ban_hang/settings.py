@@ -31,6 +31,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    # 'jazzmin',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -138,3 +139,4 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'hoangvanquy772003@gmail.com'
 EMAIL_HOST_PASSWORD = 'thup teub gmjd kxvk'
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+

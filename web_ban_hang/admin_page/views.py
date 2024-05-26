@@ -253,8 +253,8 @@ def cart(request):
     return render(request, 'cart.html', context)
 
 def password_reset_request(request):
-    list = ['Adidas', 'Jordan', 'Nike', 'Puma', 'New Balance', 'Pro Max', 'Pro Max', 'Mira']
-    brand = Category.objects.all()
+    # list = ['Adidas', 'Jordan', 'Nike', 'Puma', 'New Balance', 'Pro Max', 'Pro Max', 'Mira']
+    # brand = Category.objects.all()
     if request.method == "POST":
         password_form = PasswordResetForm(request.POST)
         if password_form.is_valid():
