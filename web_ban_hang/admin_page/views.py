@@ -231,7 +231,8 @@ def detail_product(request):
         product_id = request.GET['detail']
         product_sizes = ProductSize.objects.filter(product_id=product_id) 
         brand = Category.objects.all()
-        return render(request, 'detail_product.html', {'product_sizes': product_sizes , 'user_name' : user_name, 'brand': brand,'list':list})
+        products = Product.objects.all()
+        return render(request, 'detail_product.html', {'product_sizes': product_sizes , 'user_name' : user_name, 'brand': brand,'list':list,'products':products})
 
     
 def cart(request):
