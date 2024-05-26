@@ -37,11 +37,11 @@
                         <p class="product-name">{{ item.product.name }}</p>
                     </td>
                     <td>
-                        <h5>{{  item.product.price }} VNĐ</h5>
+                        <h5 class="product-price" data-price="{{ item.product.price }}"> VNĐ</h5>
                     </td>
-                    <td>{{ item.quantity }}</td>
+                    <td >{{ item.quantity }}</td>
                     <td>
-                        <h5>{{ item.price }} VNĐ</h5>
+                        <h5 class="product-price" data-price="{{ item.price }}"> VNĐ</h5>
                     </td>
                     <td>
                         <h5>{{ item.size }}</h5>
@@ -58,7 +58,7 @@
           <hr class="second-hr">
           <div class="d-flex justify-content-between">
             <h6>Total</h6>
-            <p id="cart-total-price">{{ total_price }} VNĐ</p>
+            <p id="cart-total-price" class="product-price" data-price="{{ total_price  }}"> VNĐ</p>
           </div>
           <button onclick="payment()">THANH TOÁN</button>
         </div>

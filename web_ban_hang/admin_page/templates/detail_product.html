@@ -14,7 +14,7 @@
             </div>
             <div>
                 <h4>{{ size.product.name }}</h4>
-                <h4 id="total" style="color: #cc0000;">{{ size.product.price }} VNĐ</h4>
+                <h4 id="total" style="color: #cc0000;" class="product-price" data-price="{{ size.product.price }}"> VNĐ</h4>
                 <div style="display:flex;">
                     <div class="input-group mb-3">
                         {% for size in product_sizes %}
@@ -36,7 +36,7 @@
                         <input type="number" class="form-control" name="quantity" id="input-spinner" value="1" min="1" oninput="updateTotal()">
                     </div>
                     <div class="btn-group ml-3 flex-fill action-buttons">
-                        <button class="btn btn-add-to-cart flex-fill" type="submit" onclick = test() "{% url 'addcart' %}">
+                        <button class="btn btn-add-to-cart flex-fill" id="vdl" type="submit" "{% url 'addcart' %}">
                             <i class="fa fa-shopping-cart"></i> THÊM VÀO GIỎ
                         </button>
                     </div>
@@ -47,7 +47,20 @@
         {% endfor %}
     </form>
 </div>
-
+<div style="z-index: 1; ">
+    <h1>Sản phẩm khác</h1>
+</div>
+<div class="large-12 columns">
+    <div class="owl-carousel owl-theme">
+        {% for item in products %}
+      <div class="item" style="padding-top:100px;">
+        
+        <a href="{% url 'detail_product' %}?detail={{ item.id}}"><img class="thumbnail" style="height:150px;" src="/static/{{item.image}}" ></a>
+        <span class="product-name" style="width:300px;">{{ item.name }}</span>
+      </div>
+      {% endfor %}
+    </div>
+    </div>
 <style>
     .input-spinner input {
         width: 60px;
@@ -72,6 +85,40 @@
     .vcl span {
         cursor: pointer;
     }
+    .product-name {
+        position: absolute;
+        bottom: 10px; /* Vị trí bắt đầu */
+        left: 50%;
+        transform: translateX(-50%);
+        background-color: rgba(0, 0, 0, 0.7);
+        color: white;
+        padding: 5px;
+        border-radius: 3px;
+        opacity: 0;
+        transition: opacity 0.3s ease-in-out, bottom 0.3s ease-in-out;
+    }
+
+    .item {
+        position: relative;
+        overflow: visible; /* Đảm bảo nội dung không tràn ra ngoài */
+    }
+
+    .item:hover .product-name {
+        display: block;
+        animation: slide-up 0.3s forwards; /* Thực hiện animation */
+    }
+
+    @keyframes slide-up {
+        0% {
+            left: 100%;
+            opacity: 0;
+        }
+        100% {
+            bottom:40%;
+            left: -50px;
+            opacity: 1;
+        }
+    }
 </style>
 
 <script>
@@ -83,7 +130,7 @@
         var pricePerItem = parseFloat("{{ size.product.price }}"); // Giá mỗi sản phẩm, chuyển về số thực
         var total = quantity * pricePerItem;
         
-        document.getElementById("total").textContent = total.toFixed(2) + " VNĐ"; // Định dạng tiền VNĐ
+        document.getElementById("total").textContent = formatPrice(total.toFixed(0)) + " VNĐ"; // Định dạng tiền VNĐ
         {% endif %}
         {% endfor %}
         document.getElementById("quantity").value = quantity;
@@ -99,12 +146,66 @@
         {% for size in product_sizes %}
         if (size_shoes === "{{ size.size.name }}") {
             document.getElementById("quantity").textContent = "Còn " + "{{ size.quantity }} " + "sản phẩm";
+            if("{{ size.quantity }}" !== "0"){
+            document.getElementById("input-spinner").max = "{{ size.quantity }}";
+            }else{
+                document.getElementById("input-spinner").max = 1;
+                document.getElementById("input-spinner").min = 1;
+            }
+            if("{{ size.quantity }}" === "0"){
+            document.getElementById("vdl").disabled = true;
+        }else{
+            document.getElementById("vdl").disabled = false;
         }
+        }
+
         {% endfor %}
+        
     }
 
-    function test(){
-        
+    document.addEventListener('DOMContentLoaded', function() {
+        var defaultElement = document.querySelector('.mr-3'); // Select the default size element
+        if (defaultElement) {
+            toggleSelected(defaultElement);
+        }
+    });
+
+    $(document).ready(function() {
+              $('.owl-carousel').owlCarousel({
+                loop: true,
+                margin: 10,
+                responsiveClass: true,
+                responsive: {
+                  0: {
+                    items: 1,
+                    nav: true
+                  },
+                  600: {
+                    items: 3,
+                    nav: false
+                  },
+                  1000: {
+                    items: 5,
+                    nav: true,
+                    loop: false,
+                    margin: 20
+                  }
+                }
+              })
+            })
+
+            function showProductName(element) {
+        var productName = element.querySelector('.product-name');
+        if (productName) {
+            productName.style.display = 'block';
+        }
+    }
+
+    function hideProductName(element) {
+        var productName = element.querySelector('.product-name');
+        if (productName) {
+            productName.style.display = 'none';
+        }
     }
 </script>
 {% endblock detail-content %}

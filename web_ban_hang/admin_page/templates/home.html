@@ -12,7 +12,7 @@
             <hr>
             <button class="btn btn-outline-secondary add-btn btn-cart">Thêm vào giỏ hàng</button>
             <a class="btn btn-outline-success btn-seen" href="{% url 'detail_product' %}?detail={{ product.id}}">Xem</a>
-            <h4 style="display:inline-block; float: right; font-size:16px;"><strong>{{ product.price }} VNĐ</strong></h4>
+            <h4 style="display:inline-block; float: right; font-size:16px;"><strong class="product-price" data-price="{{ product.price }}">VNĐ</strong></h4>
         </div>
     </div>
     {% endfor %}
@@ -25,9 +25,8 @@
         <div class="box-element product">
             <h6><strong>{{ product.name }}</strong></h6>
             <hr>
-            {% comment %} <button class="btn btn-outline-secondary add-btn btn-cart">Thêm vào giỏ hàng</button> {% endcomment %}
             <a class="btn btn-outline-success btn-seen" href="{% url 'detail_product' %}?detail={{ product.id}}">Xem</a>
-            <h4 style="display:inline-block; float: right; font-size:16px;"><strong>{{ product.price }} VNĐ</strong></h4>
+            <h4 style="display:inline-block; float: right; font-size:16px;"><strong class="product-price" data-price="{{ product.price }}">VNĐ</strong></h4>
         </div>
     </div>
     {% endfor %}
